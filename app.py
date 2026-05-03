@@ -13,7 +13,7 @@ def get_db():
         user=os.environ.get("MYSQLUSER"),
         password=os.environ.get("MYSQLPASSWORD"),
         database=os.environ.get("MYSQLDATABASE"),
-        port=int(os.environ.get("MYSQLPORT", 3306))
+        port=int(os.environ.get("MYSQLPORT", 8080))
     )
 
 # ------- HOME / LOGIN PAGE -------
@@ -336,5 +336,5 @@ def logout():
 
 # ------- RUN APP -------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
