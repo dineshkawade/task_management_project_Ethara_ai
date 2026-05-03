@@ -4,8 +4,7 @@ import os
 from datetime import date
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "mysecretkey123")
-
+app.secret_key = os.environ.get("DINESH")
 
 # ------- DB CONNECTION -------
 def get_db():
@@ -49,15 +48,7 @@ def login():
         return redirect("/admin" if role == "admin" else "/member")
 
     return render_template("login.html", error="Invalid credentials")
-
-@app.route("/register", methods=["POST"])
-def register():
-    username = request.form["username"]
-    password = request.form["password"]
-    role = request.form["role"]
-
-    db = get_db()
-    cursor = db.cursor()
+#sign up
 @app.route("/signup", methods=["POST"])
 def signup():
     username = request.form["username"]
@@ -67,7 +58,7 @@ def signup():
     db = get_db()
     cursor = db.cursor(dictionary=True)
 
-    # check if user exists
+    # Check if user already exists
     cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
     existing = cursor.fetchone()
 
@@ -75,7 +66,7 @@ def signup():
         db.close()
         return render_template("login.html", error="User already exists")
 
-    # insert new user
+    # Insert new user
     cursor.execute(
         "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
         (username, password, role)
@@ -85,23 +76,7 @@ def signup():
     db.close()
 
     return render_template("login.html", signup_success=True)
-    # check if user already exists
-    cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
-    existing = cursor.fetchone()
 
-    if existing:
-        db.close()
-        return "User already exists"
-
-    cursor.execute(
-        "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
-        (username, password, role)
-    )
-
-    db.commit()
-    db.close()
-
-    return redirect("/")
 # ------- ADMIN DASHBOARD -------
 @app.route("/admin")
 def admin_dashboard():
@@ -270,7 +245,7 @@ def member_dashboard():
 
     tasks = cursor.fetchall()
 
-    # 🔥 NEW: GET TASKS WITH ADMIN NAME
+    #  NEW: GET TASKS WITH ADMIN NAME
     cursor.execute("""
         SELECT tasks.title,
                projects.name as project_name,
@@ -332,12 +307,11 @@ def mark_done(task_id):
 @app.route("/update_progress/<int:task_id>/<int:value>", methods=["POST"])
 def update_progress(task_id, value):
     if session.get("role") != "member":
-        return redirect("/")
+        return {"success": False}
 
     db = get_db()
     cursor = db.cursor()
 
-    # 🔥 If progress = 100 → mark as done
     if value == 100:
         cursor.execute(
             "UPDATE tasks SET progress=%s, status='done' WHERE id=%s AND assigned_to=%s",
@@ -352,8 +326,7 @@ def update_progress(task_id, value):
     db.commit()
     db.close()
 
-    return redirect("/member")  
-
+    return {"success": True, "progress": value}
 # ------- LOGOUT -------
 @app.route("/logout")
 def logout():
@@ -363,4 +336,5 @@ def logout():
 
 # ------- RUN APP -------
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
