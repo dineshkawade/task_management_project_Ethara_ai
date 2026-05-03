@@ -7,22 +7,22 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 
 # ------- DB CONNECTION -------
-import os
-import mysql.connector
-from urllib.parse import urlparse
-
 def get_db():
-    url = os.environ.get("MYSQL_URL")
-
-    parsed = urlparse(url)
-
-    return mysql.connector.connect(
-        host=parsed.hostname,
-        user=parsed.username,
-        password=parsed.password,
-        database=parsed.path[1:],
-        port=parsed.port
-    )# ------- HOME / LOGIN PAGE -------
+    try:
+        print("Connecting to DB...")
+        conn = mysql.connector.connect(
+            host=os.environ.get("MYSQLHOST"),
+            user=os.environ.get("MYSQLUSER"),
+            password=os.environ.get("MYSQLPASSWORD"),
+            database=os.environ.get("MYSQLDATABASE"),
+            port=int(os.environ.get("MYSQLPORT", 3306))
+        )
+        print("DB CONNECTED SUCCESS")
+        return conn
+    except Exception as e:
+        print("DB ERROR:", e)
+        raise e
+    # ------- HOME / LOGIN PAGE -------
 @app.route("/")
 def index():
     return render_template("login.html")
