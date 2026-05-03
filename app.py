@@ -4,18 +4,26 @@ import os
 from datetime import date
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("DINESH")
+app.secret_key = os.environ.get("SECRET_KEY")
 
 # ------- DB CONNECTION -------
-def get_db():
-    return mysql.connector.connect(
-        host=os.environ.get("MYSQLHOST"),
-        user=os.environ.get("MYSQLUSER"),
-        password=os.environ.get("MYSQLPASSWORD"),
-        database=os.environ.get("MYSQLDATABASE"),
-        port=int(os.environ.get("MYSQLPORT", 3306))
-    )
+from urllib.parse import urlparse
 
+def get_db():
+    url = os.environ.get("MYSQL_URL")
+
+    if not url:
+        raise Exception("MYSQL_URL not found")
+
+    parsed = urlparse(url)
+
+    return mysql.connector.connect(
+        host=parsed.hostname,
+        user=parsed.username,
+        password=parsed.password,
+        database=parsed.path.lstrip('/'),
+        port=parsed.port or 3306
+    )
 # ------- HOME / LOGIN PAGE -------
 @app.route("/")
 def index():
