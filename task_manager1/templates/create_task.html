@@ -1,0 +1,143 @@
+<!-- templates/create_task.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Task</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+        }
+
+        .topbar {
+            background: linear-gradient(90deg, #4a90d9, #6a5acd);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .topbar a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            font-size: 13px;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: #4a90d9;
+            outline: none;
+            box-shadow: 0 0 5px rgba(74,144,217,0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #4a90d9, #6a5acd);
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .back {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: #4a90d9;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <span>Create Task</span>
+    <a href="/admin">← Back to Dashboard</a>
+</div>
+
+<div class="container">
+    <div class="card">
+
+        <h2>Create New Task</h2>
+
+        <form action="/create_task" method="POST">
+
+            <label>Task Title</label>
+            <input type="text" name="title" placeholder="Enter task title" required>
+
+            <label>Assign Member</label>
+            <select name="member_id">
+                {% for member in members %}
+                <option value="{{ member.id }}">{{ member.username }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Select Project</label>
+            <select name="project_id">
+                {% for project in projects %}
+                <option value="{{ project.id }}">{{ project.name }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Deadline</label>
+            <input type="date" name="deadline">
+
+            <button class="btn">Create Task</button>
+
+        </form>
+
+        <a href="/admin" class="back">⬅ Go Back</a>
+
+    </div>
+</div>
+
+</body>
+</html>
