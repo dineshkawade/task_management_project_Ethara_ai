@@ -1,94 +1,71 @@
 Team Task Manager - README
-==========================
 
-A simple web app where admins can create projects, assign tasks to team members, 
-and track progress. Built with Flask and MySQL.
-
+A simple web application where admins can create projects, assign tasks to team members, and track their progress. Built using Flask and PostgreSQL, and deployed on Render.
 
 HOW TO RUN LOCALLY
-------------------
 
-1. Make sure you have Python and MySQL installed.
-
+1. Make sure you have Python installed.
 2. Install required packages:
-   pip install -r requirements.txt
-
-3. Set up the database:
-   mysql -u root -p < setup_db.sql
-
+    pip install -r requirements.txt
+3. Set up the PostgreSQL database and update your DATABASE_URL in environment variables.
 4. Run the app:
-   python app.py
-
+    python app.py
 5. Open your browser and go to:
-   http://localhost:5000
-
+    http://localhost:5000
 
 FEATURES
---------
-- Signup and Login with role selection (Admin or Member)
-- Admin can create Projects with a name and description
-- Admin can create Tasks and assign them to members with a deadline
-- Admin can see all tasks, delete tasks, and delete projects
-- Member can see their own tasks sorted by deadline
-- Member can mark tasks as Done
-- Overdue tasks are highlighted in yellow on both dashboards
-- Member dashboard shows a summary (total, pending, done, overdue)
 
+* Signup and Login with role selection (Admin or Member)
+* Admin can create Projects with name and description
+* Admin can create Tasks, assign them to members with deadlines
+* Admin can view all tasks and projects
+* Member can view their assigned tasks sorted by deadline
+* Member can mark tasks as Done and update progress
+* Overdue tasks are highlighted
+* Member dashboard shows task summary (total, pending, done, overdue)
 
 ROLES
------
-- Admin: Can manage projects, create tasks, assign to members, delete tasks/projects
-- Member: Can view their assigned tasks and mark them as done
 
+* Admin: Can manage projects, create tasks, assign to members
+* Member: Can view assigned tasks and update status/progress
 
 PROJECT STRUCTURE
------------------
-app.py              - Main Flask application with all routes
-setup_db.sql        - SQL file to create the database and tables
-requirements.txt    - Python packages needed
-Procfile            - For Railway deployment
+
+app.py              - Main Flask application with routes
+requirements.txt    - Required Python packages
 templates/
-    login.html          - Login and Signup page
-    admin_dashboard.html - Admin panel
-    member_dashboard.html - Member panel
+login.html              - Login and Signup page
+admin_dashboard.html    - Admin dashboard
+member_dashboard.html  - Member dashboard
 
+DEPLOYMENT ON RENDER
 
-DEPLOYMENT ON RAILWAY
----------------------
-
-1. Push your code to a GitHub repository.
-
-2. Go to https://railway.app and create a new project.
-
-3. Click "Deploy from GitHub repo" and select your repository.
-
-4. Add a MySQL database plugin in Railway.
-
-5. In Railway, go to your app's Variables tab and add these:
-   DB_HOST     = (from Railway MySQL plugin, the host value)
-   DB_USER     = (from Railway MySQL plugin, the user value)
-   DB_PASSWORD = (from Railway MySQL plugin, the password value)
-   DB_NAME     = task_manager_db
-   SECRET_KEY  = any_random_string_here
-
-6. In the Railway MySQL shell, run the setup_db.sql file to create the tables:
-   Copy the contents of setup_db.sql and paste it in the MySQL shell.
-
-7. Railway will automatically detect the Procfile and deploy using gunicorn.
-
-8. Your app will get a live URL like https://yourapp.up.railway.app
-
+1. Push your project to a GitHub repository.
+2. Go to https://render.com and create a new Web Service.
+3. Connect your GitHub repository and select the project.
+4. Render will auto-detect Python and Flask setup.
+5. Set the following:
+    Build Command:
+    pip install -r requirements.txt
+    Start Command:
+    gunicorn app:app
+6. Add Environment Variables:
+    DATABASE_URL = (from Render PostgreSQL dashboard)
+    SECRET_KEY  = any_random_string
+7. Create a PostgreSQL database in Render.
+8. Copy the External Database URL and paste it into DATABASE_URL.
+9. Open database shell (psql) and run the SQL file to create tables.
+10. Deploy the service. Render will provide a live URL.
 
 TECH STACK
-----------
-- Backend:  Python, Flask
-- Database: MySQL
-- Frontend: HTML, CSS (no frameworks, just plain HTML)
-- Deploy:   Railway
 
+* Backend: Python, Flask
+* Database: PostgreSQL
+* Frontend: HTML, CSS
+* Deployment: Render
 
 NOTES
------
-- Passwords are stored as plain text (this is a beginner project, not production ready)
-- No JavaScript frameworks used, just vanilla JS for the login/signup toggle
-- All styles are written inline in the HTML files for simplicity
+
+* Passwords are stored as plain text (for learning purpose)
+* Simple UI without any frontend framework
+* Designed as a beginner-friendly full stack project
