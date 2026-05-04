@@ -1,28 +1,22 @@
 from flask import Flask, render_template, request, redirect, session
-import mysql.connector
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
 from datetime import date
 
+print("APP STARTED SUCCESSFULLY")
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 
 # ------- DB CONNECTION -------
+# ------- DB CONNECTION -------
 def get_db():
-    try:
-        print("Connecting to DB...")
-        conn = mysql.connector.connect(
-            host=os.environ.get("MYSQLHOST"),
-            user=os.environ.get("MYSQLUSER"),
-            password=os.environ.get("MYSQLPASSWORD"),
-            database=os.environ.get("MYSQLDATABASE"),
-            port=int(os.environ.get("MYSQLPORT", 3306))
-        )
-        print("DB CONNECTED SUCCESS")
-        return conn
-    except Exception as e:
-        print("DB ERROR:", e)
-        raise e
-    # ------- HOME / LOGIN PAGE -------
+    return psycopg2.connect(os.environ.get("DATABASE_URL"))
+
+# wherever you need a cursor:
+db = get_db()
+cursor = db.cursor(cursor_factory=RealDictCursor)
+# ------- HOME / LOGIN PAGE -------
 @app.route("/")
 def index():
     return render_template("login.html")
@@ -36,8 +30,7 @@ def login():
     role = request.form["role"]
 
     db = get_db()
-    cursor = db.cursor(dictionary=True)
-
+    cursor = db.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
         "SELECT * FROM users WHERE username=%s AND password=%s AND role=%s",
         (username, password, role)
@@ -62,8 +55,7 @@ def signup():
     role = request.form["role"]
 
     db = get_db()
-    cursor = db.cursor(dictionary=True)
-
+    cursor = db.cursor(cursor_factory=RealDictCursor)
     # Check if user already exists
     cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
     existing = cursor.fetchone()
@@ -90,8 +82,7 @@ def admin_dashboard():
         return redirect("/")
 
     db = get_db()
-    cursor = db.cursor(dictionary=True)
-
+    cursor = db.cursor(cursor_factory=RealDictCursor)
     # PROJECTS
     cursor.execute("SELECT * FROM projects ORDER BY id DESC")
     projects = cursor.fetchall()
@@ -139,8 +130,7 @@ def create_task_page():
         return redirect("/")
 
     db = get_db()
-    cursor = db.cursor(dictionary=True)
-
+    cursor = db.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT id, username FROM users WHERE role='member'")
     members = cursor.fetchall()
 
@@ -164,8 +154,7 @@ def create_project():
     description = request.form["description"]
 
     db = get_db()
-    cursor = db.cursor()
-
+    cursor = db.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
         "INSERT INTO projects (name, description, created_by) VALUES (%s, %s, %s)",
         (name, description, session["user_id"])
@@ -189,7 +178,7 @@ def create_task():
     project_id = request.form["project_id"]
 
     db = get_db()
-    cursor = db.cursor()
+    cursor = db.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute(
         "INSERT INTO tasks (title, assigned_to, deadline, status, project_id, progress, notified) VALUES (%s, %s, %s, 'pending', %s, 0, 0)",
@@ -209,7 +198,7 @@ def manage_members():
         return redirect("/")
 
     db = get_db()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(cursor_factory=RealDictCursor)
 
     query = """
         SELECT users.username,
@@ -236,7 +225,7 @@ def member_dashboard():
         return redirect("/")
 
     db = get_db()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(cursor_factory=RealDictCursor)
 
     # TASKS (unchanged + safe)
     cursor.execute("""
@@ -296,7 +285,7 @@ def mark_done(task_id):
         return redirect("/")
 
     db = get_db()
-    cursor = db.cursor()
+    cursor = db.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute(
         "UPDATE tasks SET status='done' WHERE id=%s AND assigned_to=%s",
@@ -316,7 +305,7 @@ def update_progress(task_id, value):
         return {"success": False}
 
     db = get_db()
-    cursor = db.cursor()
+    cursor = db.cursor(cursor_factory=RealDictCursor)
 
     if value == 100:
         cursor.execute(
@@ -339,8 +328,11 @@ def logout():
     session.clear()
     return redirect("/")
 
+@app.route("/health")
+def health():
+    return "OK"
 
 # ------- RUN APP -------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+   port = int(os.environ.get("PORT", 8080))
+   app.run(host="0.0.0.0", port=port)
